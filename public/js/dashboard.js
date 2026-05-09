@@ -47,6 +47,7 @@ export async function render(root) {
     if (sevCounts[i.severity] !== undefined) sevCounts[i.severity]++;
   }
   const maxSev = Math.max(1, ...Object.values(sevCounts));
+  const trackPx = 100;
 
   const activity = [];
   for (const i of incidents.slice(0, 8)) {
@@ -63,19 +64,12 @@ export async function render(root) {
   }
   activity.sort((x, y) => new Date(y.t) - new Date(x.t));
 
+  /* Seed scenario UI (dropdown + “Seed scenario” button) is commented out at end of render().
+     Re-enable that block and insert a toolbar div after the Dashboard title if you want demo presets again. */
+
   root.innerHTML = `
     <p class="eyebrow">Overview</p>
     <h1 class="display">Dashboard</h1>
-    <div class="toolbar">
-      <select id="scenario-preset" class="field" style="max-width:280px;padding:8px 0">
-        <option value="">Seed scenario…</option>
-        <option value="database-storm">Database Connection Storm</option>
-        <option value="memory-leak-worker">Memory Leak in Worker</option>
-        <option value="bad-deploy-api">Bad Deploy — API Regression</option>
-        <option value="cache-stampede">Cache Stampede</option>
-      </select>
-      <button type="button" class="btn btn-primary" id="seed-btn">Seed scenario</button>
-    </div>
     <div class="grid grid--4" style="margin-bottom:var(--space-xl)">
       <div class="stat-card">
         <div class="stat-value">${projects.length}</div>
@@ -98,15 +92,19 @@ export async function render(root) {
     <div class="grid grid--2" style="margin-bottom:var(--space-xl)">
       <div class="card">
         <h2 class="heading-sm">Severity breakdown</h2>
-        <div class="bar-chart" aria-label="severity counts">
+        <div class="bar-chart" aria-label="severity incident counts">
           ${['sev1', 'sev2', 'sev3', 'sev4']
-            .map(
-              (s) => `
-            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex:1">
-              <div class="bar" style="height:${Math.max(8, (sevCounts[s] / maxSev) * 100)}%"></div>
-              <span class="meta">${escapeHtml(s)} (${sevCounts[s]})</span>
-            </div>`
-            )
+            .map((s) => {
+              const n = sevCounts[s];
+              const h = Math.max(n === 0 ? 0 : 6, Math.round((n / maxSev) * trackPx));
+              return `
+            <div class="bar-chart__col">
+              <div class="bar-chart__track">
+                <div class="bar" style="height:${h}px" title="${n} incidents"></div>
+              </div>
+              <span class="meta">${escapeHtml(s)} (${n})</span>
+            </div>`;
+            })
             .join('')}
         </div>
       </div>
@@ -151,6 +149,18 @@ export async function render(root) {
     });
   });
 
+  /* Seed scenario — paste this HTML after <h1 class="display">Dashboard</h1>:
+    <div class="toolbar">
+      <select id="scenario-preset" class="field" style="max-width:280px;padding:8px 0">
+        <option value="">Seed scenario…</option>
+        <option value="database-storm">Database Connection Storm</option>
+        <option value="memory-leak-worker">Memory Leak in Worker</option>
+        <option value="bad-deploy-api">Bad Deploy — API Regression</option>
+        <option value="cache-stampede">Cache Stampede</option>
+      </select>
+      <button type="button" class="btn btn-primary" id="seed-btn">Seed scenario</button>
+    </div>
+
   const btn = root.querySelector('#seed-btn');
   const sel = root.querySelector('#scenario-preset');
   btn.addEventListener('click', async () => {
@@ -171,4 +181,5 @@ export async function render(root) {
       btn.disabled = false;
     }
   });
+  */
 }

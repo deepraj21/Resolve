@@ -1,4 +1,5 @@
 import { api } from './api.js';
+import { hideLoading, showLoading } from './loading.js';
 import * as Dashboard from './dashboard.js';
 import * as Projects from './projects.js';
 import * as Incidents from './incidents.js';
@@ -44,7 +45,7 @@ async function render() {
   const { path, parts } = parseHash();
   paintNav();
 
-  appEl.innerHTML = `<p class="meta">Loading…</p>`;
+  showLoading();
 
   try {
     if (path === '/' || path === '') {
@@ -66,6 +67,8 @@ async function render() {
   } catch (e) {
     const msg = e?.message || String(e);
     appEl.innerHTML = `<div class="toast toast--error" style="position:static">${msg.replace(/</g, '&lt;')}</div>`;
+  } finally {
+    hideLoading();
   }
 }
 

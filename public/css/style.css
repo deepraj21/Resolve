@@ -86,11 +86,27 @@ a:hover {
   padding: var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   background: var(--color-canvas);
   height: 100%;
   min-height: 0;
   overflow: hidden;
+}
+
+/* Tighter space under “Resolve” / above nav (heading-md is global) */
+.sidebar .heading-md {
+  margin-bottom: var(--space-sm);
+}
+
+.sidebar-brand {
+  color: var(--color-ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sidebar-brand:hover {
+  text-decoration: none;
+  opacity: 0.82;
 }
 
 .brand {
@@ -142,7 +158,6 @@ a:hover {
 .sidebar-foot {
   margin-top: auto;
   padding-top: var(--space-lg);
-  border-top: 1px solid var(--color-hairline);
   font-size: 13px;
   color: var(--color-slate);
 }
@@ -197,7 +212,7 @@ a:hover {
 }
 
 .heading-md {
-  padding-left: 12px;
+  padding-left: 10px;
   font-size: 36px;
   font-weight: 400;
   line-height: 1;
@@ -663,7 +678,7 @@ label {
 .tabs {
   display: flex;
   gap: var(--space-xs);
-  border-bottom: 1px solid var(--color-hairline);
+  /* border-bottom: 1px solid var(--color-hairline); */
   margin-bottom: var(--space-lg);
 }
 .tab {
@@ -708,17 +723,41 @@ label {
   margin-bottom: var(--space-md);
 }
 
+/* Severity breakdown: fixed track height so bar heights (px) draw correctly */
 .bar-chart {
   display: flex;
   gap: var(--space-sm);
-  align-items: flex-end;
-  height: 120px;
+  align-items: stretch;
+  min-height: 120px;
 }
-.bar {
+
+.bar-chart__col {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.bar-chart__track {
+  width: 100%;
+  max-width: 56px;
+  height: 100px;
+  margin-top: auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bar {
+  width: 100%;
+  max-width: 56px;
+  min-height: 0;
   background: var(--color-hairline);
   border-top: 2px solid var(--color-ink);
-  min-height: 8px;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  transition: height 0.15s ease;
 }
 
 .spark {
@@ -780,4 +819,63 @@ label {
 
 .checkbox-cell {
   width: 36px;
+}
+
+/* Full-screen loader — dot grid inspired by https://dotmatrix.zzzzshawn.cloud/ */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(254, 254, 254, 0.88);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.loading-overlay--visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.dot-matrix-loader {
+  --dm-cell: 11px;
+  display: grid;
+  grid-template-columns: repeat(8, var(--dm-cell));
+  grid-template-rows: repeat(8, var(--dm-cell));
+  gap: 6px;
+}
+
+.dot-matrix-loader__dot {
+  width: var(--dm-cell);
+  height: var(--dm-cell);
+  border-radius: 2px;
+  background: var(--color-primary);
+  opacity: 0.12;
+  transform: scale(0.88);
+  animation: dot-matrix-pulse 1.35s ease-in-out infinite;
+}
+
+@keyframes dot-matrix-pulse {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(0.88);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot-matrix-loader__dot {
+    animation: none;
+    opacity: 0.45;
+  }
 }
