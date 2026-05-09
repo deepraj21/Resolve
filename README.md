@@ -60,6 +60,48 @@ flowchart TB
 
 ---
 
+## UI reference
+
+Screens captured from the running app, used as visual reference for the surfaces described above.
+
+### Dashboard
+
+Top-level overview with project/incident/alert counts, health cards, recent activity, and the **Seed scenario** entry point.
+
+![Dashboard](./ui-images/dashboard.png)
+
+### Projects
+
+Project cards and detail tabs (overview, related alerts, logs with level filter, telemetry, linked knowledge).
+
+![Projects](./ui-images/projects.png)
+
+### Incidents
+
+Incident list and detail page where **Investigate with AI**, **Generate remediation**, and **Generate postmortem** are triggered. The Analysis panel renders streamed Markdown via Streamdown.
+
+![Incidents](./ui-images/incidents.png)
+
+### Alerts
+
+Firing / acknowledged / resolved alerts with filters, **Generate alert** (AI), and bulk acknowledge/resolve actions.
+
+![Alerts](./ui-images/alerts.png)
+
+### Knowledge
+
+Knowledge base of runbooks and postmortems, including AI-generated postmortems linked back to projects.
+
+![Knowledge](./ui-images/knowledge.png)
+
+### About
+
+About surface describing the simulation scope and stack.
+
+![About](./ui-images/about.png)
+
+---
+
 ## Prerequisites
 
 - **Node.js** 18+ (with `fetch` and native ES modules)
