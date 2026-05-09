@@ -337,6 +337,33 @@ a:hover {
   font-family: inherit;
 }
 
+.btn[data-loading='true'] {
+  opacity: 0.85;
+  cursor: progress;
+}
+.btn .btn-spinner {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: btn-spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn .btn-spinner {
+    animation: none;
+    border-right-color: currentColor;
+    opacity: 0.6;
+  }
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

@@ -6,6 +6,7 @@ import {
   sourceBadge,
   formatTime,
   toast,
+  withButtonLoading,
 } from './components.js';
 
 export async function render(root) {
@@ -120,30 +121,34 @@ export async function render(root) {
     return [...root.querySelectorAll('.alert-chk:checked')].map((c) => c.value);
   }
 
-  root.querySelector('#bulk-ack').addEventListener('click', async () => {
-    const ids = await selectedIds();
-    for (const id of ids) {
-      try {
-        await api.alerts.acknowledge(id);
-      } catch (e) {
-        toast(e.message, 'error');
+  root.querySelector('#bulk-ack').addEventListener('click', (ev) => {
+    withButtonLoading(ev.currentTarget, async () => {
+      const ids = await selectedIds();
+      for (const id of ids) {
+        try {
+          await api.alerts.acknowledge(id);
+        } catch (e) {
+          toast(e.message, 'error');
+        }
       }
-    }
-    toast('Acknowledged');
-    location.reload();
+      toast('Acknowledged');
+      location.reload();
+    });
   });
 
-  root.querySelector('#bulk-res').addEventListener('click', async () => {
-    const ids = await selectedIds();
-    for (const id of ids) {
-      try {
-        await api.alerts.resolve(id);
-      } catch (e) {
-        toast(e.message, 'error');
+  root.querySelector('#bulk-res').addEventListener('click', (ev) => {
+    withButtonLoading(ev.currentTarget, async () => {
+      const ids = await selectedIds();
+      for (const id of ids) {
+        try {
+          await api.alerts.resolve(id);
+        } catch (e) {
+          toast(e.message, 'error');
+        }
       }
-    }
-    toast('Resolved');
-    location.reload();
+      toast('Resolved');
+      location.reload();
+    });
   });
 
   root.querySelector('#gen-alert').addEventListener('click', () => {
@@ -181,21 +186,24 @@ export async function render(root) {
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) close();
     });
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      try {
-        await api.ai.generateAlert({
-          project_id: fd.get('project_id'),
-          severity: fd.get('severity'),
-          source: fd.get('source'),
-        });
-        toast('Alert created');
-        close();
-        location.reload();
-      } catch (err) {
-        toast(err.message, 'error');
-      }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      withButtonLoading(submitBtn, async () => {
+        const fd = new FormData(form);
+        try {
+          await api.ai.generateAlert({
+            project_id: fd.get('project_id'),
+            severity: fd.get('severity'),
+            source: fd.get('source'),
+          });
+          toast('Alert created');
+          close();
+          location.reload();
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      });
     });
   });
 }

@@ -10,6 +10,7 @@ import {
   sourceBadge,
   renderMarkdown,
   el,
+  withButtonLoading,
 } from './components.js';
 
 function parseTech(stack) {
@@ -225,17 +226,37 @@ async function renderDetail(root, id) {
       `);
       const { element, close } = modal({ title: 'Generate alert', body: form });
       document.body.appendChild(element);
-      form.addEventListener('submit', async (ev) => {
+      form.addEventListener('submit', (ev) => {
         ev.preventDefault();
-        const fd = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        withButtonLoading(submitBtn, async () => {
+          const fd = new FormData(form);
+          try {
+            await api.ai.generateAlert({
+              project_id: id,
+              severity: fd.get('severity'),
+              source: fd.get('source'),
+            });
+            toast('Alert generated');
+            close();
+            await reloadData();
+            paint();
+          } catch (e) {
+            toast(e.message, 'error');
+          }
+        });
+      });
+    });
+
+    root.querySelector('#btn-gen-logs')?.addEventListener('click', (ev) => {
+      withButtonLoading(ev.currentTarget, async () => {
         try {
-          await api.ai.generateAlert({
+          await api.ai.generateLogs({
             project_id: id,
-            severity: fd.get('severity'),
-            source: fd.get('source'),
+            count: 18,
+            scenario: 'realistic errors mixed with normal traffic',
           });
-          toast('Alert generated');
-          close();
+          toast('Logs generated');
           await reloadData();
           paint();
         } catch (e) {
@@ -244,46 +265,35 @@ async function renderDetail(root, id) {
       });
     });
 
-    root.querySelector('#btn-gen-logs')?.addEventListener('click', async () => {
-      try {
-        await api.ai.generateLogs({
-          project_id: id,
-          count: 18,
-          scenario: 'realistic errors mixed with normal traffic',
-        });
-        toast('Logs generated');
-        await reloadData();
-        paint();
-      } catch (e) {
-        toast(e.message, 'error');
-      }
+    root.querySelector('#btn-gen-tel')?.addEventListener('click', (ev) => {
+      withButtonLoading(ev.currentTarget, async () => {
+        try {
+          await api.ai.generateTelemetry({ project_id: id });
+          toast('Telemetry snapshots added');
+          await reloadData();
+          paint();
+        } catch (e) {
+          toast(e.message, 'error');
+        }
+      });
     });
 
-    root.querySelector('#btn-gen-tel')?.addEventListener('click', async () => {
-      try {
-        await api.ai.generateTelemetry({ project_id: id });
-        toast('Telemetry snapshots added');
-        await reloadData();
-        paint();
-      } catch (e) {
-        toast(e.message, 'error');
-      }
-    });
-
-    root.querySelector('#btn-create-inc')?.addEventListener('click', async () => {
+    root.querySelector('#btn-create-inc')?.addEventListener('click', (ev) => {
       const title = prompt('Incident title');
       if (!title) return;
-      try {
-        const inc = await api.incidents.create({
-          title,
-          description: '',
-          severity: 'sev3',
-          project_id: id,
-        });
-        location.hash = `#/incidents/${inc.id}`;
-      } catch (e) {
-        toast(e.message, 'error');
-      }
+      withButtonLoading(ev.currentTarget, async () => {
+        try {
+          const inc = await api.incidents.create({
+            title,
+            description: '',
+            severity: 'sev3',
+            project_id: id,
+          });
+          location.hash = `#/incidents/${inc.id}`;
+        } catch (e) {
+          toast(e.message, 'error');
+        }
+      });
     });
   }
 
@@ -352,24 +362,27 @@ export async function render(root, params) {
     `);
     const { element, close } = modal({ title: 'New project', body: form });
     document.body.appendChild(element);
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      try {
-        await api.projects.create({
-          name: fd.get('name'),
-          description: fd.get('description'),
-          service_type: fd.get('service_type'),
-          team: fd.get('team'),
-          tech_stack: JSON.stringify(['node']),
-          status: 'healthy',
-        });
-        toast('Project created');
-        close();
-        await render(root, {});
-      } catch (err) {
-        toast(err.message, 'error');
-      }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      withButtonLoading(submitBtn, async () => {
+        const fd = new FormData(form);
+        try {
+          await api.projects.create({
+            name: fd.get('name'),
+            description: fd.get('description'),
+            service_type: fd.get('service_type'),
+            team: fd.get('team'),
+            tech_stack: JSON.stringify(['node']),
+            status: 'healthy',
+          });
+          toast('Project created');
+          close();
+          await render(root, {});
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      });
     });
   });
 }

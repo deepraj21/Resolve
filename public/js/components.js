@@ -111,3 +111,21 @@ export function renderMarkdown(md) {
   if (!window.marked) return `<pre class="md-fallback">${escapeHtml(md)}</pre>`;
   return `<div class="md">${window.marked.parse(md || '', { mangle: false, headerIds: false })}</div>`;
 }
+
+export async function withButtonLoading(btn, fn) {
+  if (!btn) return fn();
+  if (btn.dataset.loading === 'true') return;
+  const original = btn.innerHTML;
+  btn.dataset.loading = 'true';
+  btn.disabled = true;
+  btn.setAttribute('aria-busy', 'true');
+  btn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span><span class="btn-label">${original}</span>`;
+  try {
+    return await fn();
+  } finally {
+    btn.dataset.loading = 'false';
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+    btn.innerHTML = original;
+  }
+}

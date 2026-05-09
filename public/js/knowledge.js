@@ -1,5 +1,12 @@
 import { api } from './api.js';
-import { escapeHtml, renderMarkdown, el, modal, toast } from './components.js';
+import {
+  escapeHtml,
+  renderMarkdown,
+  el,
+  modal,
+  toast,
+  withButtonLoading,
+} from './components.js';
 
 export async function render(root, params) {
   const articles = await api.knowledge.list();
@@ -37,22 +44,25 @@ export async function render(root, params) {
       form.querySelector('[name="content"]').value = k.content;
       const { element, close } = modal({ title: 'Edit article', body: form });
       document.body.appendChild(element);
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const fd = new FormData(form);
-        try {
-          await api.knowledge.update(k.id, {
-            title: fd.get('title'),
-            category: fd.get('category'),
-            content: fd.get('content'),
-          });
-          toast('Saved');
-          close();
-          location.hash = `#/knowledge/${k.id}`;
-          location.reload();
-        } catch (err) {
-          toast(err.message, 'error');
-        }
+        const submitBtn = form.querySelector('button[type="submit"]');
+        withButtonLoading(submitBtn, async () => {
+          const fd = new FormData(form);
+          try {
+            await api.knowledge.update(k.id, {
+              title: fd.get('title'),
+              category: fd.get('category'),
+              content: fd.get('content'),
+            });
+            toast('Saved');
+            close();
+            location.hash = `#/knowledge/${k.id}`;
+            location.reload();
+          } catch (err) {
+            toast(err.message, 'error');
+          }
+        });
       });
     });
     return;
@@ -110,28 +120,31 @@ export async function render(root, params) {
     `);
     const { element, close } = modal({ title: 'New article', body: form });
     document.body.appendChild(element);
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      let tags = [];
-      try {
-        tags = JSON.parse(fd.get('tags') || '[]');
-      } catch {
-        tags = [];
-      }
-      try {
-        const row = await api.knowledge.create({
-          title: fd.get('title'),
-          category: fd.get('category'),
-          content: fd.get('content'),
-          project_id: fd.get('project_id') || null,
-          tags,
-        });
-        close();
-        location.hash = `#/knowledge/${row.id}`;
-      } catch (err) {
-        toast(err.message, 'error');
-      }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      withButtonLoading(submitBtn, async () => {
+        const fd = new FormData(form);
+        let tags = [];
+        try {
+          tags = JSON.parse(fd.get('tags') || '[]');
+        } catch {
+          tags = [];
+        }
+        try {
+          const row = await api.knowledge.create({
+            title: fd.get('title'),
+            category: fd.get('category'),
+            content: fd.get('content'),
+            project_id: fd.get('project_id') || null,
+            tags,
+          });
+          close();
+          location.hash = `#/knowledge/${row.id}`;
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      });
     });
   });
 }

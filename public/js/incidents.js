@@ -7,6 +7,7 @@ import {
   renderMarkdown,
   el,
   modal,
+  withButtonLoading,
 } from './components.js';
 
 function parseTimeline(json) {
@@ -148,71 +149,92 @@ async function renderDetail(root, id) {
     }
   });
 
-  root.querySelector('#btn-inv').addEventListener('click', async () => {
-    streamBuf = '';
-    investigating = true;
-    renderPanel();
-    try {
-      await api.ai.investigateStream(id, (evt) => {
-        if (evt.chunk) {
-          streamBuf += evt.chunk;
+  root.querySelector('#btn-inv').addEventListener('click', (e) => {
+    withButtonLoading(
+      e.currentTarget,
+      () =>
+        new Promise((resolve) => {
+          streamBuf = '';
+          investigating = true;
           renderPanel();
-        }
-        if (evt.error) {
-          toast(evt.error, 'error');
-          investigating = false;
-          renderPanel();
-        }
-        if (evt.done) {
-          investigating = false;
-          renderPanel();
-          root.querySelector('#btn-rem').disabled = false;
-          toast('RCA saved');
-        }
-      });
-    } catch (e) {
-      toast(e.message, 'error');
-      investigating = false;
-      renderPanel();
-    }
+          api.ai
+            .investigateStream(id, (evt) => {
+              if (evt.chunk) {
+                streamBuf += evt.chunk;
+                renderPanel();
+              }
+              if (evt.error) {
+                toast(evt.error, 'error');
+                investigating = false;
+                renderPanel();
+                resolve();
+              }
+              if (evt.done) {
+                investigating = false;
+                renderPanel();
+                const remBtn = root.querySelector('#btn-rem');
+                if (remBtn && remBtn.dataset.loading !== 'true') remBtn.disabled = false;
+                toast('RCA saved');
+                resolve();
+              }
+            })
+            .catch((err) => {
+              toast(err.message, 'error');
+              investigating = false;
+              renderPanel();
+              resolve();
+            });
+        })
+    );
   });
 
-  root.querySelector('#btn-rem').addEventListener('click', async () => {
-    streamBuf = '';
-    investigating = true;
-    renderPanel();
-    try {
-      await api.ai.remediateStream(id, (evt) => {
-        if (evt.chunk) {
-          streamBuf += evt.chunk;
+  root.querySelector('#btn-rem').addEventListener('click', (e) => {
+    withButtonLoading(
+      e.currentTarget,
+      () =>
+        new Promise((resolve) => {
+          streamBuf = '';
+          investigating = true;
           renderPanel();
-        }
-        if (evt.error) {
-          toast(evt.error, 'error');
-          investigating = false;
-          renderPanel();
-        }
-        if (evt.done) {
-          investigating = false;
-          renderPanel();
-          toast('Remediation saved');
-        }
-      });
-    } catch (e) {
-      toast(e.message, 'error');
-      investigating = false;
-      renderPanel();
-    }
+          api.ai
+            .remediateStream(id, (evt) => {
+              if (evt.chunk) {
+                streamBuf += evt.chunk;
+                renderPanel();
+              }
+              if (evt.error) {
+                toast(evt.error, 'error');
+                investigating = false;
+                renderPanel();
+                resolve();
+              }
+              if (evt.done) {
+                investigating = false;
+                renderPanel();
+                toast('Remediation saved');
+                resolve();
+              }
+            })
+            .catch((err) => {
+              toast(err.message, 'error');
+              investigating = false;
+              renderPanel();
+              resolve();
+            });
+        })
+    );
   });
 
-  root.querySelector('#btn-pm').addEventListener('click', async () => {
-    try {
-      await api.ai.postmortem(id);
-      toast('Postmortem article created in Knowledge');
-      location.hash = '#/knowledge';
-    } catch (e) {
-      toast(e.message, 'error');
-    }
+  root.querySelector('#btn-pm').addEventListener('click', (e) => {
+    withButtonLoading(e.currentTarget, async () => {
+      try {
+        await api.ai.postmortem(id);
+        toast('Postmortem article created in Knowledge');
+        location.hash = '#/knowledge';
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
   });
 }
 
@@ -293,21 +315,24 @@ export async function render(root, params) {
     `);
     const { element, close } = modal({ title: 'New incident', body: form });
     document.body.appendChild(element);
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      try {
-        const inc = await api.incidents.create({
-          title: fd.get('title'),
-          description: fd.get('description'),
-          severity: fd.get('severity'),
-          project_id: fd.get('project_id'),
-        });
-        close();
-        location.hash = `#/incidents/${inc.id}`;
-      } catch (err) {
-        toast(err.message, 'error');
-      }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      withButtonLoading(submitBtn, async () => {
+        const fd = new FormData(form);
+        try {
+          const inc = await api.incidents.create({
+            title: fd.get('title'),
+            description: fd.get('description'),
+            severity: fd.get('severity'),
+            project_id: fd.get('project_id'),
+          });
+          close();
+          location.hash = `#/incidents/${inc.id}`;
+        } catch (err) {
+          toast(err.message, 'error');
+        }
+      });
     });
   });
 }
