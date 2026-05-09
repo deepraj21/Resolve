@@ -1,7 +1,7 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-const PRIMARY_MODEL = 'poolside/laguna-m.1:free';
-const FALLBACK_MODEL = 'z-ai/glm-4.5-air:free';
+export const PRIMARY_MODEL = 'poolside/laguna-m.1:free';
+export const FALLBACK_MODEL = 'z-ai/glm-4.5-air:free';
 
 function headers() {
   const key = process.env.OPENROUTER_API_KEY;

@@ -8,6 +8,7 @@ import knowledgeRouter from './routes/knowledge.js';
 import logsRouter from './routes/logs.js';
 import telemetryRouter from './routes/telemetry.js';
 import aiRouter from './routes/ai.js';
+import { PRIMARY_MODEL, FALLBACK_MODEL } from './services/openrouter.js';
 
 export async function createApp() {
   await initSchema();
@@ -23,7 +24,12 @@ export async function createApp() {
   });
 
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true, service: 'resolve' });
+    res.json({
+      ok: true,
+      service: 'resolve',
+      model: PRIMARY_MODEL,
+      fallback_model: FALLBACK_MODEL,
+    });
   });
 
   app.use('/api/projects', projectsRouter);

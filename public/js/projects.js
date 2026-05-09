@@ -310,8 +310,8 @@ export async function render(root, params) {
 
   root.innerHTML = `
     <p class="eyebrow">Fleet</p>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-      <h1 class="display">Projects</h1>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:var(--space-lg)">
+      <h1 class="display" style="margin:0">Projects</h1>
       <button type="button" class="btn btn-primary" id="new-project">New project</button>
     </div>
     <div class="grid grid--3" style="margin-top:24px">

@@ -5,6 +5,7 @@ import * as Projects from './projects.js';
 import * as Incidents from './incidents.js';
 import * as Alerts from './alerts.js';
 import * as Knowledge from './knowledge.js';
+import * as About from './about.js';
 
 const appEl = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -39,6 +40,8 @@ function paintNav() {
     else active = path === p;
     a.classList.toggle('active', active);
   });
+  const aboutLink = document.getElementById('about-link');
+  if (aboutLink) aboutLink.classList.toggle('active', path === '/about');
 }
 
 async function render() {
@@ -61,6 +64,8 @@ async function render() {
     } else if (path === '/knowledge') {
       if (parts[1]) await Knowledge.render(appEl, { id: parts[1] });
       else await Knowledge.render(appEl, {});
+    } else if (path === '/about') {
+      await About.render(appEl);
     } else {
       appEl.innerHTML = `<p class="meta">Not found</p>`;
     }
@@ -76,7 +81,8 @@ window.addEventListener('hashchange', render);
 
 (async () => {
   try {
-    await api.health();
+    const h = await api.health();
+    if (h?.model) window.__resolveModel = h.model;
     const dot = document.getElementById('health-dot');
     const lbl = document.getElementById('health-label');
     if (dot) dot.style.background = 'var(--signal-green)';

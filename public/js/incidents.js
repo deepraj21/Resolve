@@ -34,8 +34,21 @@ async function renderDetail(root, id) {
 
   let streamBuf = '';
   let investigating = false;
+  let thinkingLabel = '';
+
+  function modelLabel() {
+    const raw = window.__resolveModel || 'model';
+    return raw.replace(/:free$/, '');
+  }
 
   function renderPanel() {
+    const thinking = root.querySelector('#ai-thinking');
+    if (thinking) {
+      const showThink = investigating && !streamBuf.trim();
+      thinking.hidden = !showThink;
+      const lbl = thinking.querySelector('.ai-thinking__label');
+      if (lbl && thinkingLabel) lbl.textContent = thinkingLabel;
+    }
     if (activeStreamApi) {
       activeStreamApi.update(streamBuf, investigating);
       return;
@@ -77,6 +90,10 @@ async function renderDetail(root, id) {
       <div>
         <h2 class="heading-sm">Analysis</h2>
         <div id="ai-panel" class="ai-panel-stream" aria-live="polite">
+          <div id="ai-thinking" class="ai-thinking" hidden>
+            <span class="ai-thinking__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+            <span class="ai-thinking__label">Thinking…</span>
+          </div>
           <div id="ai-panel-root"></div>
         </div>
 
@@ -156,6 +173,7 @@ async function renderDetail(root, id) {
         new Promise((resolve) => {
           streamBuf = '';
           investigating = true;
+          thinkingLabel = `Investigating with ${modelLabel()}…`;
           renderPanel();
           api.ai
             .investigateStream(id, (evt) => {
@@ -195,6 +213,7 @@ async function renderDetail(root, id) {
         new Promise((resolve) => {
           streamBuf = '';
           investigating = true;
+          thinkingLabel = `Generating remediation with ${modelLabel()}…`;
           renderPanel();
           api.ai
             .remediateStream(id, (evt) => {
@@ -253,8 +272,8 @@ export async function render(root, params) {
 
   root.innerHTML = `
     <p class="eyebrow">Response</p>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-      <h1 class="display">Incidents</h1>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:var(--space-lg)">
+      <h1 class="display" style="margin:0">Incidents</h1>
       <button type="button" class="btn btn-primary" id="new-inc">New incident</button>
     </div>
     <div class="table-wrap" style="margin-top:24px">
