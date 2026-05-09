@@ -19,6 +19,47 @@ There are no real integrations with Prometheus, PagerDuty, or production systems
 
 ---
 
+## Architecture
+
+High-level view of how the browser, API server, database, and LLM fit together.
+
+```mermaid
+flowchart TB
+  subgraph browser [Browser]
+    shell[Vanilla SPA shell and hash routing]
+    pages[Dashboard Projects Incidents Alerts Knowledge]
+    streamUi[React island Streamdown RCA and remediation stream]
+  end
+
+  subgraph express [Express server]
+    static["Static files public"]
+    rest["REST JSON api projects alerts incidents knowledge logs telemetry"]
+    sse["SSE streaming api ai investigate remediate"]
+    svc[services openrouter investigator simulator]
+  end
+
+  subgraph data [Persistence]
+    db[(Turso libSQL or local SQLite file)]
+  end
+
+  subgraph ai [LLM]
+    orApi[OpenRouter chat completions]
+  end
+
+  shell --> pages
+  pages -->|fetch JSON| rest
+  streamUi -->|fetch SSE POST| sse
+  shell --> static
+  rest --> db
+  sse --> svc
+  svc --> orApi
+  rest --> svc
+```
+
+**Flow notes:** CRUD and reads go through REST handlers that query **libSQL**. AI actions call **OpenRouter** (non-streaming for JSON alert or log generation; streaming for investigate and remediate). The incident **Analysis** panel uses a small bundled **React + Streamdown** client that consumes the SSE stream and renders Markdown live.
+
+---
+
 ## Prerequisites
 
 - **Node.js** 18+ (with `fetch` and native ES modules)
@@ -171,4 +212,4 @@ At the end of this path you have: **simulated telemetry and logs**, a **recorded
 
 ## License
 
-Private / your repository policy unless you add an explicit license file.
+This project is licensed under the [MIT License](LICENSE).
