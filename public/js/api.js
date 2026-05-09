@@ -129,5 +129,7 @@ export const api = {
       fetchJSON(`/ai/generate-postmortem/${incidentId}`, { method: 'POST', body: '{}' }),
     seedScenario: (preset) =>
       fetchJSON('/ai/seed-scenario', { method: 'POST', body: JSON.stringify({ preset }) }),
+    aboutChat: (messages, onEvent) =>
+      streamPost('/ai/about-chat', { messages }, { onEvent }),
   },
 };

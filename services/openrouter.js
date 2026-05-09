@@ -67,6 +67,16 @@ export async function completeJSON(systemPrompt, userPrompt, options = {}) {
 }
 
 export async function streamCompletion(systemPrompt, userPrompt, options = {}) {
+  return streamMessages(
+    [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
+    options
+  );
+}
+
+export async function streamMessages(messages, options = {}) {
   const models = [options.model || PRIMARY_MODEL, FALLBACK_MODEL];
   let lastErr;
   for (const model of models) {
@@ -76,10 +86,7 @@ export async function streamCompletion(systemPrompt, userPrompt, options = {}) {
         headers: headers(),
         body: JSON.stringify({
           model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
+          messages,
           stream: true,
           temperature: options.temperature ?? 0.5,
           max_tokens: options.max_tokens ?? 2000,

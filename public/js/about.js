@@ -1,3 +1,6 @@
+import { api } from './api.js';
+import { renderMarkdown, withButtonLoading, escapeHtml, toast } from './components.js';
+
 export async function render(root) {
   const model = window.__resolveModel
     ? String(window.__resolveModel).replace(/:free$/, '')
@@ -14,7 +17,41 @@ export async function render(root) {
       (alert, log, telemetry sample) is generated and stored locally.
     </p>
 
-    <div class="grid grid--3" style="margin-top:var(--space-xl)">
+    <section class="about-chat" style="margin-top:var(--space-xl)">
+      <div class="about-chat__head">
+        <h2 class="heading-sm" style="margin:0">Ask Resolve</h2>
+        <span class="meta">Powered by <code>${escape(model)}</code></span>
+      </div>
+      <p class="meta" style="margin:0 0 var(--space-md)">
+        Ask anything about the app — what a screen does, how a feature is wired, what to test, the architecture, or use cases.
+      </p>
+
+      <div id="chat-log" class="chat-log" aria-live="polite"></div>
+
+      <form id="chat-form" class="chat-form">
+        <input
+          id="chat-input"
+          type="text"
+          class="chat-input"
+          placeholder="e.g. How do I generate a postmortem?"
+          autocomplete="off"
+          required
+        />
+        <button type="submit" class="btn btn-primary" id="chat-send">Ask</button>
+      </form>
+
+      <div class="chat-suggestions" id="chat-suggestions">
+        <button type="button" class="chat-chip" data-q="What is Resolve and what problem does it solve?">What is Resolve?</button>
+        <button type="button" class="chat-chip" data-q="Walk me through the end-to-end test flow.">Test flow</button>
+        <button type="button" class="chat-chip" data-q="What does the Analysis panel on the incident page do?">Analysis panel</button>
+        <button type="button" class="chat-chip" data-q="How does the AI generate alerts and logs?">AI generators</button>
+        <button type="button" class="chat-chip" data-q="What are good use cases for this app?">Use cases</button>
+      </div>
+    </section>
+
+    <h2 class="heading-sm" style="margin-top:var(--space-xl)">Quick reference</h2>
+
+    <div class="grid grid--3" style="margin-top:var(--space-md)">
       <div class="card">
         <strong style="color:var(--color-ink)">No real integrations</strong>
         <p class="meta" style="margin-top:8px">No Prometheus, Datadog, or PagerDuty calls. Sources are decorative labels on synthetic alerts so the UI feels real.</p>
@@ -173,6 +210,106 @@ export async function render(root) {
       <strong>README.md</strong> in the repository.
     </p>
   `;
+
+  initChat(root, model);
+}
+
+function initChat(root, model) {
+  const log = root.querySelector('#chat-log');
+  const form = root.querySelector('#chat-form');
+  const input = root.querySelector('#chat-input');
+  const sendBtn = root.querySelector('#chat-send');
+  const suggestions = root.querySelector('#chat-suggestions');
+
+  const history = [];
+
+  function appendMessage(role, contentHtml, isStreaming) {
+    const wrap = document.createElement('div');
+    wrap.className = `chat-msg chat-msg--${role}`;
+    wrap.innerHTML = `
+      <div class="chat-msg__role">${role === 'user' ? 'You' : 'Resolve'}</div>
+      <div class="chat-msg__body">${contentHtml}</div>
+    `;
+    if (isStreaming) wrap.dataset.streaming = 'true';
+    log.appendChild(wrap);
+    log.scrollTop = log.scrollHeight;
+    return wrap;
+  }
+
+  function setStreamingDots(el) {
+    const body = el.querySelector('.chat-msg__body');
+    body.innerHTML = `
+      <span class="ai-thinking__dots" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="meta" style="margin-left:8px">Asking ${escapeHtml(model)}…</span>
+    `;
+  }
+
+  function paintAssistant(el, text) {
+    const body = el.querySelector('.chat-msg__body');
+    body.innerHTML = renderMarkdown(text || '');
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async function ask(question) {
+    const trimmed = question.trim();
+    if (!trimmed) return;
+    input.value = '';
+    suggestions.style.display = 'none';
+
+    appendMessage('user', `<p>${escapeHtml(trimmed)}</p>`, false);
+    const assistantEl = appendMessage('assistant', '', true);
+    setStreamingDots(assistantEl);
+
+    history.push({ role: 'user', content: trimmed });
+
+    let buf = '';
+    let firstChunk = true;
+
+    await withButtonLoading(
+      sendBtn,
+      () =>
+        new Promise((resolve) => {
+          api.ai
+            .aboutChat(history, (evt) => {
+              if (evt.chunk) {
+                if (firstChunk) {
+                  firstChunk = false;
+                  assistantEl.querySelector('.chat-msg__body').innerHTML = '';
+                }
+                buf += evt.chunk;
+                paintAssistant(assistantEl, buf);
+              }
+              if (evt.error) {
+                paintAssistant(assistantEl, `> Error: ${evt.error}`);
+                toast(evt.error, 'error');
+                resolve();
+              }
+              if (evt.done) {
+                if (!buf.trim()) paintAssistant(assistantEl, '_(empty response)_');
+                history.push({ role: 'assistant', content: buf });
+                delete assistantEl.dataset.streaming;
+                resolve();
+              }
+            })
+            .catch((err) => {
+              paintAssistant(assistantEl, `> Error: ${escapeHtml(err.message)}`);
+              toast(err.message, 'error');
+              resolve();
+            });
+        })
+    );
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    ask(input.value);
+  });
+
+  suggestions.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chat-chip');
+    if (!chip) return;
+    ask(chip.dataset.q || chip.textContent);
+  });
 }
 
 function escape(s) {
