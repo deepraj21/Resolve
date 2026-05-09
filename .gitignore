@@ -5,3 +5,4 @@ resolve-local.db
 .DS_Store
 .cursor/
 .vercel/
+seed/

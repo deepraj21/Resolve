@@ -3,7 +3,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&display=swap');
 
 :root {
-  --color-primary: #000000;
+  /* Brand accent — lavender (#b79ced); surfaces stay neutral */
+  --color-accent: #b79ced;
+  --color-accent-hover: #a684df;
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, white);
+  --color-accent-softer: color-mix(in srgb, var(--color-accent) 9%, white);
+  --color-primary: var(--color-accent);
   --color-on-primary: #ffffff;
   --color-ink: #030303;
   --color-ink-soft: #1a1a1a;
@@ -26,7 +31,7 @@
   --signal-orange: #c2410c;
   --signal-amber: #b45309;
   --signal-green: #047857;
-  --signal-blue: #1d4ed8;
+  --signal-blue: var(--color-accent);
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -64,7 +69,7 @@ body {
 }
 
 a {
-  color: var(--color-ink);
+  color: var(--color-accent);
   text-decoration: none;
 }
 a:hover {
@@ -152,7 +157,7 @@ a:hover {
 }
 .nav a.active {
   color: var(--color-ink);
-  background: var(--color-hairline);
+  background: var(--color-accent-soft);
 }
 
 .sidebar-foot {
@@ -185,9 +190,9 @@ a:hover {
   text-decoration: none;
 }
 .sidebar-foot-btn.active {
-  background: var(--color-ink);
+  background: var(--color-accent);
   color: var(--color-on-primary, #fff);
-  border-color: var(--color-ink);
+  border-color: var(--color-accent);
 }
 
 .about-chat {
@@ -228,15 +233,16 @@ a:hover {
 }
 .chat-msg--user {
   align-self: flex-end;
-  background: var(--color-ink);
+  background: var(--color-accent);
   color: var(--color-on-primary, #fff);
-  border-color: var(--color-ink);
+  border-color: color-mix(in srgb, var(--color-accent) 85%, #1a1a1a);
 }
 .chat-msg--user .chat-msg__role {
   color: rgba(255, 255, 255, 0.65);
 }
 .chat-msg--assistant {
   align-self: flex-start;
+  box-shadow: inset 3px 0 0 var(--color-accent);
 }
 .chat-msg__role {
   font-size: 11px;
@@ -261,7 +267,7 @@ a:hover {
   padding-left: 1.25rem;
 }
 .chat-msg__body code {
-  background: rgba(0, 0, 0, 0.06);
+  background: color-mix(in srgb, var(--color-accent) 12%, white);
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 0.9em;
@@ -270,7 +276,7 @@ a:hover {
   background: rgba(255, 255, 255, 0.18);
 }
 .chat-msg__body pre {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--color-accent-softer);
   padding: 10px 12px;
   border-radius: var(--radius-md);
   overflow: auto;
@@ -299,7 +305,7 @@ a:hover {
 }
 .chat-input:focus {
   outline: none;
-  border-color: var(--color-ink);
+  border-color: var(--color-accent);
 }
 
 .chat-suggestions {
@@ -321,7 +327,7 @@ a:hover {
   transition: background 0.15s ease, color 0.15s ease;
 }
 .chat-chip:hover {
-  background: var(--color-canvas-warm);
+  background: var(--color-accent-soft);
   color: var(--color-ink);
 }
 
@@ -461,7 +467,7 @@ a:hover {
 }
 
 .card--featured {
-  background: var(--color-hairline);
+  background: var(--color-accent-softer);
 }
 
 .btn {
@@ -483,11 +489,14 @@ a:hover {
   background: var(--color-primary);
   color: var(--color-on-primary);
 }
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
 
 .btn-ghost {
   background: var(--color-canvas);
-  color: var(--color-ink);
-  border: 1px solid var(--color-ink);
+  color: var(--color-accent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 55%, var(--color-ink));
 }
 
 .btn-text {
@@ -559,7 +568,7 @@ th {
   letter-spacing: 0.2px;
   text-transform: uppercase;
   color: var(--color-slate);
-  background: var(--color-canvas-warm);
+  background: var(--color-accent-softer);
 }
 
 tr:hover td {
@@ -582,7 +591,7 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-bottom-color: var(--color-ink);
+  border-bottom-color: var(--color-accent);
 }
 
 label {
@@ -705,7 +714,7 @@ label {
   background: var(--signal-red);
 }
 .health-dot--blue {
-  background: var(--signal-blue);
+  background: var(--color-accent);
 }
 
 .project-card {
@@ -757,7 +766,7 @@ label {
   width: 9px;
   height: 9px;
   border-radius: var(--radius-full);
-  background: var(--color-ink);
+  background: var(--color-accent);
 }
 
 /* Live AI stream uses Streamdown (React) in #ai-panel-root — see .ai-panel-stream */
@@ -772,6 +781,7 @@ label {
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.5;
+  box-shadow: inset 0 1px 0 rgba(183, 156, 237, 0.22);
 }
 
 .ai-panel-stream #ai-panel-root {
@@ -802,7 +812,7 @@ label {
   animation: ai-thinking-bounce 1.1s ease-in-out infinite;
 }
 .ai-panel-stream .ai-thinking__dots > span {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(183, 156, 237, 0.95);
 }
 .ai-thinking__dots > span:nth-child(2) {
   animation-delay: 0.18s;
@@ -853,7 +863,7 @@ label {
   color: rgba(255, 255, 255, 0.88);
 }
 .ai-panel-stream a {
-  color: rgba(255, 255, 255, 0.95);
+  color: color-mix(in srgb, var(--color-accent) 92%, white);
   text-decoration: underline;
 }
 .ai-panel-stream ul,
@@ -865,7 +875,7 @@ label {
   font-size: 0.9em;
   padding: 0.1em 0.35em;
   border-radius: var(--radius-xs);
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(183, 156, 237, 0.22);
 }
 .ai-panel-stream pre {
   padding: var(--space-md);
@@ -906,8 +916,8 @@ label {
   font-weight: 400;
 }
 .md pre {
-  background: var(--color-canvas-warm);
-  border: 1px solid var(--color-hairline);
+  background: var(--color-accent-softer);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, var(--color-hairline));
   padding: var(--space-md);
   overflow: auto;
 }
@@ -935,7 +945,7 @@ label {
 }
 .tab.active {
   color: var(--color-ink);
-  background: var(--color-hairline);
+  background: var(--color-accent-soft);
 }
 
 .modal-overlay {
@@ -995,8 +1005,8 @@ label {
   width: 100%;
   max-width: 56px;
   min-height: 0;
-  background: var(--color-hairline);
-  border-top: 2px solid var(--color-ink);
+  background: var(--color-accent-softer);
+  border-top: 2px solid var(--color-accent);
   border-radius: var(--radius-xs) var(--radius-xs) 0 0;
   transition: height 0.15s ease;
 }
@@ -1009,7 +1019,7 @@ label {
 }
 .spark span {
   flex: 1;
-  background: var(--color-hairline-soft);
+  background: color-mix(in srgb, var(--color-accent) 38%, white);
   min-height: 4px;
 }
 
