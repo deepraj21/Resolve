@@ -6,8 +6,8 @@
   "scripts": {
     "build": "node scripts/build-ai-stream.js",
     "build:ai-stream": "node scripts/build-ai-stream.js",
-    "dev": "node scripts/build-ai-stream.js && node server.js",
-    "start": "node server.js",
+    "dev": "node scripts/build-ai-stream.js && node scripts/dev.js",
+    "start": "node scripts/dev.js",
     "seed": "node db/seed.js"
   },
   "dependencies": {
