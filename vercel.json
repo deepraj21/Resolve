@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "rewrites": [{ "source": "/api/(.*)", "destination": "/api" }],
   "functions": {
     "api/index.js": {
       "maxDuration": 300
