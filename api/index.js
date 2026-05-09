@@ -1,4 +1,4 @@
-import { createApp } from '../app.js';
+import { createApp } from '../lib/app.js';
 
 let appPromise = null;
 
