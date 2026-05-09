@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resolve — AI SRE Simulation</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/streamdown.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="heading-md">
+          <span>Resolve</span>
+        </div>
+        <nav class="nav" id="nav"></nav>
+        <div class="sidebar-foot">
+          <div class="status-pill">
+            <span class="status-dot" id="health-dot"></span>
+            <span id="health-label">Checking…</span>
+          </div>
+        </div>
+      </aside>
+      <main class="main" id="app"></main>
+    </div>
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

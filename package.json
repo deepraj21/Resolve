@@ -1,0 +1,24 @@
+{
+  "name": "resolve",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-ai-stream.js",
+    "build:ai-stream": "node scripts/build-ai-stream.js",
+    "dev": "node scripts/build-ai-stream.js && node server.js",
+    "start": "node server.js",
+    "seed": "node db/seed.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "streamdown": "^2.5.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}
